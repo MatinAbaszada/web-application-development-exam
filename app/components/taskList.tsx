@@ -6,7 +6,6 @@ import { useMutation } from "@tanstack/react-query";
 import TaskComponent from "@/app/components/taskComponent";
 
 async function updateTask(id: string, done: boolean) {
-    console.log(`Updating task with id: ${id} to done: ${done}`);
     const request = await fetch(`/api/tasks/`, {
         method: 'PUT',
         headers: {
@@ -22,7 +21,6 @@ async function updateTask(id: string, done: boolean) {
 }
 
 async function addTask(title: string) {
-    console.log('Adding task with title:', title);
     const request = await fetch(`/api/tasks`, {
         method: 'POST',
         headers: {
@@ -30,7 +28,6 @@ async function addTask(title: string) {
         },
         body: JSON.stringify({ title }),
     });
-    console.log('Response from server:', request);
     if (!request.ok) {
         throw new Error('Failed to add task');
     }
@@ -41,28 +38,20 @@ async function addTask(title: string) {
 
 export default function TaskList({ initialTasks }: { initialTasks: Task[] }) {
     const [tasks, setTasks] = useState<Task[]>(initialTasks || []);
-    const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
     const [newTaskTitle, setNewTaskTitle] = useState<string>('');
     const updateTaskMutation = useMutation({
         mutationFn: ({ id, done }: { id: string; done: boolean }) => updateTask(id, done),
         onSuccess: (updatedTask) => {
             setTasks((prevTasks) =>
                 prevTasks.map(function (task) {
-                    console.log('Checking task:', task.id, 'against updated task id:', updatedTask.id);
-                    if (task.id == updatedTask.id) {
-                        console.log('Updating task in state:', updatedTask);
-                    }
                     return task.id === updatedTask.id ? updatedTask : task;
                 })
             );
-            console.log('Task updated:', updatedTask);
-            console.log('Updated tasks list:', tasks);
         },
     });
     const addTaskMutation = useMutation({
         mutationFn: (title: string) => addTask(title),
         onSuccess: (newTask) => {
-            console.log('New task added:', newTask);
             setTasks((prevTasks) => [...prevTasks, newTask]);
             setNewTaskTitle('');
         },
@@ -70,8 +59,10 @@ export default function TaskList({ initialTasks }: { initialTasks: Task[] }) {
 
     return (
         <div className="p-4">
-            <h1 className="text-lg font-medium ">Tasks To Do</h1>
-            {
+            <div className="flex gap-4 mb-4">
+            <div className="w-1/2 pr-4">
+                <h1 className="text-lg font-medium ">Tasks To Do</h1>
+                {
 
                 tasks.map(function (task) {
                     if (task.done !== true) {
@@ -80,7 +71,9 @@ export default function TaskList({ initialTasks }: { initialTasks: Task[] }) {
                         );
                     }
                 })
-            }
+                }
+            </div>
+            <div className="w-1/2 pl-4">
             <h1 className="text-lg font-medium ">Tasks Done</h1>
             {
 
@@ -92,6 +85,8 @@ export default function TaskList({ initialTasks }: { initialTasks: Task[] }) {
                     }
                 })
             }
+                </div>
+            </div>
             <h1 className="text-lg font-medium ">Add New Task</h1>
             <input
                 className="border p-2 mb-4 w-full"

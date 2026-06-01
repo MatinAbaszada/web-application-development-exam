@@ -4,7 +4,6 @@ import TaskList from "../components/taskList";
 
 export default async function TasksPage() {
     const tasks = await getTasks();
-    console.log('Fetched tasks:', tasks);
     
     const taskFormatted = tasks.map((task) => ({
         id: task.id,
